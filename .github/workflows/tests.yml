@@ -44,9 +44,3 @@ jobs:
 
     - name: Run tests
       run: mix test --warnings-as-errors
-
-    - name: Check seeds
-      run: |
-        mix ecto.create
-        mix ecto.migrate
-        mix run priv/repo/seeds.exs
