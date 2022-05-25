@@ -1,5 +1,7 @@
 import Config
 
+config :dice, :connection, Dice.Connection.Mock
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
