@@ -1,5 +1,7 @@
 defmodule Dice.Verification do
-  @moduledoc false
+  @moduledoc """
+      This module keeps receiving messages (updates) from the chats he is in and sends them to the reply module.
+  """
   use GenServer
   require Logger
 

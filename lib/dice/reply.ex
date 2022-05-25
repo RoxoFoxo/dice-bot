@@ -3,33 +3,32 @@ defmodule Dice.Reply do
   This module checks what message was sent and sends a reply back
   """
 
+  alias Dice.Connection
+
   #  alias Dice.Lists
   #  I'll be translating these lists to english in the future
+  #
+  #      text == "/char" ->
+  #        Dice.Connection.send_message(
+  #          chat_id,
+  #          "Você é um #{Enum.random(Lists.races())} #{Enum.random(Lists.classes())}, que #{
+  #            Enum.random(Lists.lore())
+  #          } e #{Enum.random(Lists.objective())}."
+  #        )
 
   def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "text" => text}}) do
     cond do
-      #      text == "/char" ->
-      #        Dice.Connection.send_message(
-      #          chat_id,
-      #          "Você é um #{Enum.random(Lists.races())} #{Enum.random(Lists.classes())}, que #{
-      #            Enum.random(Lists.lore())
-      #          } e #{Enum.random(Lists.objective())}."
-      #        )
-
       text == "/beep" ->
-        Dice.Connection.send_message(chat_id, "boop")
-
-      #      text == "/quote" ->
-      #        Dice.Connection.send_message(chat_id, Enum.random(Lists.quotes()))
+        Connection.send_message(chat_id, "boop")
 
       text == "/paw" ->
-        Dice.Connection.send_sticker(
+        Connection.send_sticker(
           chat_id,
           "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
         )
 
       text == "/cutie" ->
-        Dice.Connection.send_sticker(
+        Connection.send_sticker(
           chat_id,
           "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
         )
@@ -45,13 +44,11 @@ defmodule Dice.Reply do
           |> String.replace(~r'(\+|\-|/|\*)+$', "")
           |> Code.eval_string()
 
-        text =
-          text
-          |> String.replace(~r'(/r|/roll) ', "")
+        roll_input = String.replace(text, ~r'(/r|/roll) ', "")
 
-        Dice.Connection.send_message(
+        Connection.send_message(
           chat_id,
-          "Calculando #{text}! Resultado: #{result}"
+          "Calculating #{roll_input}! Result: #{result}"
         )
 
       Regex.match?(~r'paw', text) ->
@@ -85,10 +82,7 @@ defmodule Dice.Reply do
         |> Enum.reduce(fn x, acc -> x + acc end)
         |> Integer.to_string()
 
-      Regex.match?(~r'^[0-9]+$', text) ->
-        text
-
-      Regex.match?(~r'(\+|\-|\/|\*)', text) ->
+      Regex.match?(~r'(^[0-9]+$|\+|\-|\/|\*)', text) ->
         text
 
       true ->
@@ -97,10 +91,8 @@ defmodule Dice.Reply do
   end
 
   defp random_paw(chat_id) do
-    random_num = Enum.random(1..10)
-
-    if random_num == 1 do
-      Dice.Connection.send_sticker(
+    if Enum.random(1..10) == 1 do
+      Connection.send_sticker(
         chat_id,
         "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
       )

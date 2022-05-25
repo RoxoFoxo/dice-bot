@@ -45,7 +45,8 @@ defmodule Dice.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:tesla, "~> 1.4.0"},
       {:hackney, "~> 1.16.0"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:hammox, "~> 0.5", only: :test}
     ]
   end
 
