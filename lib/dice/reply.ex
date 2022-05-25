@@ -59,10 +59,15 @@ defmodule Dice.Reply do
     end
   end
 
+  # I'm going to change this in the future
+  # credo:disable-for-lines:9
   def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "sticker" => %{"emoji" => emoji}}}) do
     cond do
       emoji == "🐾" ->
         random_paw(chat_id)
+
+      true ->
+        :ok
     end
   end
 
@@ -96,6 +101,8 @@ defmodule Dice.Reply do
         chat_id,
         "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
       )
+    else
+      {:ok, :not_sent}
     end
   end
 end
