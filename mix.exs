@@ -46,7 +46,8 @@ defmodule Dice.MixProject do
       {:tesla, "~> 1.4.0"},
       {:hackney, "~> 1.16.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:hammox, "~> 0.5", only: :test}
+      {:hammox, "~> 0.5", only: :test},
+      {:elixlsx, "~> 0.5.1"}
     ]
   end
 
