@@ -58,7 +58,7 @@ defmodule Dice.GameSheet do
     end
   end
 
-  def delete_game(game) do
+  def delete_game(game_detail) do
     with nil <- Repo.get_by(Game, steam_id: game_detail),
          nil <- Repo.get_by(Game, title: game_detail) do
       "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
