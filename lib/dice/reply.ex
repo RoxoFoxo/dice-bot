@@ -5,8 +5,6 @@ defmodule Dice.Reply do
 
   alias Dice.Connection
   alias Dice.GameSheet
-  alias Dice.GameSheet.Game
-  alias Dice.Repo
 
   #  alias Dice.Lists
   #  I'll be translating these lists to english in the future
