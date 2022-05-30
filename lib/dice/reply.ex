@@ -4,6 +4,9 @@ defmodule Dice.Reply do
   """
 
   alias Dice.Connection
+  alias Dice.GameSheet
+  alias Dice.GameSheet.Game
+  alias Dice.Repo
 
   #  alias Dice.Lists
   #  I'll be translating these lists to english in the future
@@ -16,7 +19,9 @@ defmodule Dice.Reply do
   #          } e #{Enum.random(Lists.objective())}."
   #        )
 
-  def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "text" => text}}) do
+  def answer(%{
+        "message" => %{"chat" => %{"id" => chat_id}, "from" => %{"id" => user_id}, "text" => text}
+      }) do
     cond do
       text == "/beep" ->
         Connection.send_message(chat_id, "boop")
@@ -32,6 +37,22 @@ defmodule Dice.Reply do
           chat_id,
           "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
         )
+
+      Regex.match?(~r(^/addgame ), text) ->
+        add_game_message =
+          text
+          |> String.trim("/addgame ")
+          |> GameSheet.add_steam_game(user_id)
+
+        Connection.send_message(chat_id, add_game_message)
+
+      Regex.match?(~r(^/deletegame ), text) ->
+        delete_game_message =
+          text
+          |> String.trim("/deletegame ")
+          |> GameSheet.delete_game()
+
+        Connection.send_message(chat_id, delete_game_message)
 
       Regex.match?(~r'^(/r|/roll) ([1-9][0-9]*d[1-9][0-9]*|[0-9]*|\+|\-|/|\*| )+$', text) ->
         {result, _} =

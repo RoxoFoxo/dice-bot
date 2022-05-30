@@ -56,7 +56,7 @@ defmodule Dice.Connection.API do
 
   def send_message(chat_id, message) do
     message = URI.encode_www_form(message)
-    get("/sendMessage?chat_id=#{chat_id}&text=#{message}")
+    get("/sendMessage?chat_id=#{chat_id}&text=#{message}&parse_mode=html")
   end
 
   def send_sticker(chat_id, sticker_id) do
