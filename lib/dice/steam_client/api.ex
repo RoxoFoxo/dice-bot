@@ -1,6 +1,6 @@
 defmodule Dice.SteamClient.API do
   @moduledoc """
-    Module to call Steam's API to get data from store pages.
+  Module to call Steam's API to get data from store pages.
   """
   @behaviour Dice.SteamClient
   use Tesla
@@ -29,13 +29,13 @@ defmodule Dice.SteamClient.API do
       game_name = data_us["name"]
 
       if data_us["is_free"] do
-        {:ok, :free, game_name}
+        {:ok, %{prices: "Free to play", title: game_name}}
       else
         price_br = get_price(data_br)
         price_us = get_price(data_us)
         discount = get_discount(data_us)
 
-        {:ok, {price_br, price_us, discount}, game_name}
+        {:ok, %{prices: "#{price_br} | #{price_us} | #{discount}", title: game_name}}
       end
     else
       %{"success" => false} ->
@@ -55,7 +55,7 @@ defmodule Dice.SteamClient.API do
     if discount == 0 do
       "No discount"
     else
-      "#{discount}%"
+      "#{discount}% off"
     end
   end
 end
