@@ -23,9 +23,6 @@ defmodule Dice.SteamClient.API do
       Logger.debug(inspect(result_br))
       Logger.debug(inspect(result_us))
 
-      # %{"success" => true, "data" => data_br} = body_br[game_id]
-      # %{"success" => true, "data" => data_us} = body_us[game_id]
-
       game_name = data_us["name"]
 
       if data_us["is_free"] do
