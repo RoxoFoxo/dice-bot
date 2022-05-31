@@ -3,13 +3,26 @@ defmodule Dice.ReplyTest do
 
   import Dice.Expectations
 
+  alias Dice.GameSheet.Game
   alias Dice.Reply
+  alias Dice.Repo
 
   @paw_file_id "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
   @cutie_file_id "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
+  @steam_game_message """
+  Garry's Mod | Suggested by: <a href="tg://user?id=1001251536">this person</a>
+  R$ 25,99 | $9.99 | No discount
+  https://store.steampowered.com/app/4000
+  """
 
   def create_message(text, :text) do
-    %{"message" => %{"chat" => %{"id" => 1_001_251_536}, "text" => text}}
+    %{
+      "message" => %{
+        "chat" => %{"id" => 1_001_251_536},
+        "from" => %{"id" => 1_001_251_536},
+        "text" => text
+      }
+    }
   end
 
   def create_message(emoji, :sticker_emoji) do
@@ -44,6 +57,77 @@ defmodule Dice.ReplyTest do
       assert result.body["result"]["sticker"]["file_id"] == @cutie_file_id
     end
 
+    test "/addgame with a game's id should show the its info" do
+      expect_get_game_data(
+        {:ok, %{prices: "R$ 25,99 | $9.99 | No discount", title: "Garry's Mod"}}
+      )
+
+      expect_send_message(@steam_game_message)
+
+      message = create_message("/addgame 4000", :text)
+
+      assert {:ok, result} = Reply.answer(message)
+      assert result.body["result"]["text"] == @steam_game_message
+    end
+
+    test "/addgame with an incorrect id should show a not found message" do
+      expect_get_game_data({:error, :not_found})
+      expect_send_message("Sorry, the ID you gave me seems invalid, maybe the ID is incorrect?")
+
+      message = create_message("/addgame 4001", :text)
+
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] ==
+               "Sorry, the ID you gave me seems invalid, maybe the ID is incorrect?"
+    end
+
+    test "/deletegame with the game's id should should show a message that the game is deleted" do
+      Repo.insert(%Game{title: "Garry's Mod", steam_id: "4000", suggester: 1_001_251_536})
+      expect_send_message("The game Garry's Mod has been deleted from my database!")
+
+      message = create_message("/deletegame 4000", :text)
+
+      # refute [] == Repo.all(Game)
+
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] ==
+               "The game Garry's Mod has been deleted from my database!"
+
+      # assert [] == Repo.all(Game)
+    end
+
+    test "/deletegame with the game's title should should show a message that the game is deleted" do
+      Repo.insert(%Game{title: "Garry's Mod", steam_id: "4000", suggester: 1_001_251_536})
+      expect_send_message("The game Garry's Mod has been deleted from my database!")
+
+      message = create_message("/deletegame Garry's Mod", :text)
+
+      # refute [] == Repo.all(Game)
+
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] ==
+               "The game Garry's Mod has been deleted from my database!"
+
+      # assert [] == Repo.all(Game)
+    end
+
+    test "/deletegame with a game that's not saved in the database should show a not found message" do
+      expect_send_message(
+        "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+      )
+
+      message = create_message("/deletegame 440", :text)
+
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] ==
+               "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+    end
+
+    # I'll be testing the dice more thoroughly later
     test "/roll should roll a d20" do
       expect_send_message("Calculating 1d20! Result: 20")
 

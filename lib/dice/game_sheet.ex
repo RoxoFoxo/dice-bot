@@ -64,7 +64,7 @@ defmodule Dice.GameSheet do
       "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
     else
       %Game{} = game ->
-        GameSheet.delete_game(game)
+        Repo.delete(game)
 
         "The game #{game.title} has been deleted from my database!"
     end

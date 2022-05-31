@@ -30,4 +30,9 @@ defmodule Dice.Expectations do
       {:ok, %Tesla.Env{body: %{"result" => %{"sticker" => %{"file_id" => sticker}}}}}
     end)
   end
+
+  def expect_get_game_data(result) do
+    Dice.SteamClient.Mock
+    |> expect(:get_game_data, fn _ -> result end)
+  end
 end
