@@ -1,10 +1,8 @@
 import Config
 
-config :dice,
-  :connection, Dice.Connection.Mock
+config :dice, :connection, Dice.Connection.Mock
 
-config :dice, 
-  :steam_client, Dice.SteamClient.Mock
+config :dice, :steam_client, Dice.SteamClient.Mock
 
 # Configure your database
 #
