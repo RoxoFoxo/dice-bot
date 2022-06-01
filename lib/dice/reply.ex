@@ -5,6 +5,7 @@ defmodule Dice.Reply do
 
   alias Dice.Connection
   alias Dice.GameSheet
+  alias Dice.Players
 
   #  alias Dice.Lists
   #  I'll be translating these lists to english in the future
@@ -17,9 +18,9 @@ defmodule Dice.Reply do
   #          } e #{Enum.random(Lists.objective())}."
   #        )
 
-  def answer(%{
-        "message" => %{"chat" => %{"id" => chat_id}, "from" => %{"id" => user_id}, "text" => text}
-      }) do
+  def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "from" => user, "text" => text}}) do
+    Players.check_user(user)
+
     cond do
       text == "/beep" ->
         Connection.send_message(chat_id, "boop")
@@ -40,7 +41,7 @@ defmodule Dice.Reply do
         add_game_message =
           text
           |> String.trim("/addgame ")
-          |> GameSheet.add_steam_game(user_id)
+          |> GameSheet.add_steam_game(user["id"])
 
         Connection.send_message(chat_id, add_game_message)
 
