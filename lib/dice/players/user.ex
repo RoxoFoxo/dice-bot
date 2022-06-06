@@ -6,10 +6,10 @@ defmodule Dice.Players.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :id, autogenerate: false}
   schema "users" do
     field :username, :string
     field :name, :string
-    field :telegram_id, :integer
 
     # many_to_many :games, Dice.GameSheet.Game, join_through: "users_games"
     has_many :users_games, Dice.GameSheet.UsersGames
@@ -19,8 +19,8 @@ defmodule Dice.Players.User do
 
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :telegram_id, :name])
-    |> validate_required([:telegram_id])
-    |> unique_constraint([:telegram_id])
+    |> cast(attrs, [:username, :id, :name])
+    |> validate_required([:id])
+    |> unique_constraint([:id])
   end
 end

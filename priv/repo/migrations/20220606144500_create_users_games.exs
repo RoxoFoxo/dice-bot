@@ -2,7 +2,7 @@ defmodule Dice.Repo.Migrations.CreateUsersGames do
   use Ecto.Migration
 
   def change do
-    create table(:users_games) do
+    create table(:users_games, primary_key: false) do
       add :owns_it, :boolean
       add :likes_it, :boolean
       add :game_id, references(:games)

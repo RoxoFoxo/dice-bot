@@ -18,8 +18,8 @@ defmodule Dice.Players do
   }
   """
   def check_user(user) do
-    stored_user = Repo.get_by(User, telegram_id: user["id"])
-    attrs = %{username: user["username"], name: user["first_name"], telegram_id: user["id"]}
+    stored_user = Repo.get_by(User, id: user["id"])
+    attrs = %{username: user["username"], name: user["first_name"], id: user["id"]}
 
     with %User{} <- stored_user,
          true <- stored_user.name == user["first_name"],
