@@ -7,13 +7,14 @@ defmodule Dice.GameSheet.Game do
   import Ecto.Changeset
 
   schema "games" do
-    field(:title, :string)
+    field :title, :string
     # save steam id as string and not integer pls
-    field(:steam_id, :string)
+    field :steam_id, :string
     # I will remove this later, when I create the users table
-    field(:suggester, :integer)
+    field :suggester, :integer
 
-    # many_to_many :users, Dice.GameSheet.User, join_through: "games_users"
+    # many_to_many :users, Dice.Players.User, join_through: "users_games"
+    has_many :users_games, Dice.GameSheet.UsersGames
 
     timestamps()
   end
