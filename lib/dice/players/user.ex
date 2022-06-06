@@ -7,11 +7,12 @@ defmodule Dice.Players.User do
   import Ecto.Changeset
 
   schema "users" do
-    field(:username, :string)
-    field(:name, :string)
-    field(:telegram_id, :integer)
+    field :username, :string
+    field :name, :string
+    field :telegram_id, :integer
 
-    # many_to_many(:games, Dice.GameSheet.Game, join_through: "games_users")
+    # many_to_many :games, Dice.GameSheet.Game, join_through: "users_games"
+    has_many :users_games, Dice.GameSheet.UsersGames
 
     timestamps()
   end
