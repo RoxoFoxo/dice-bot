@@ -2,14 +2,13 @@ defmodule Dice.Repo.Migrations.CreateGames do
   use Ecto.Migration
 
   def change do
-    create table(:games) do
+    create table(:games, primary_key: {:id, :id, autogenerate: false}) do
       add :title, :string
-      add :steam_id, :string
       add :suggester, :integer
 
       timestamps()
     end
 
-    create unique_index(:games, [:title, :steam_id])
+    create unique_index(:games, [:title])
   end
 end

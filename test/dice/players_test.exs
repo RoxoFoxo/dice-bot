@@ -25,7 +25,7 @@ defmodule Dice.PlayersTest do
 
   @stored_user %User{
     name: "Roxo",
-    telegram_id: 1_001_251_536,
+    id: 1_001_251_536,
     username: "RoxoFoxo"
   }
 
@@ -34,10 +34,10 @@ defmodule Dice.PlayersTest do
       assert [] = Repo.all(User)
 
       assert {:ok, user} = Players.check_user(@user)
-      assert user.telegram_id == 1_001_251_536
+      assert user.id == 1_001_251_536
 
       assert [user] = Repo.all(User)
-      assert user.telegram_id == 1_001_251_536
+      assert user.id == 1_001_251_536
     end
 
     test "doesn't update an user if their info is the same" do

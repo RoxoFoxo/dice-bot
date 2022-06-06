@@ -8,21 +8,20 @@ defmodule Dice.GameSheetTest do
   alias Dice.Repo
 
   @game_info {:ok, %{prices: "R$ 25,99 | $9.99 | No discount", title: "Garry's Mod"}}
+  @user %Dice.Players.User{id: 1_001_251_536}
 
   describe "add_steam_game/2" do
-    test "add a game when given its id and calls it's info back when used again" do
+    test "add a game when given its id and calls its info back when used again" do
       expect_get_game_data(@game_info)
       expect_get_game_data(@game_info)
+      Repo.insert(@user)
 
       assert [] = Repo.all(Game)
 
       GameSheet.add_steam_game("4000", 1_001_251_536)
 
       assert [game] = Repo.all(Game)
-      assert game.steam_id == "4000"
-
-      assert [game] = Repo.all(Game)
-      assert game.steam_id == "4000"
+      assert game.id == 4000
 
       GameSheet.add_steam_game("4000", 1_000_000_800)
 

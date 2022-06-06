@@ -6,10 +6,9 @@ defmodule Dice.GameSheet.Game do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :id, autogenerate: false}
   schema "games" do
     field :title, :string
-    # save steam id as string and not integer pls
-    field :steam_id, :string
     # I will remove this later, when I create the users table
     field :suggester, :integer
 
@@ -21,8 +20,8 @@ defmodule Dice.GameSheet.Game do
 
   def changeset(game, attrs) do
     game
-    |> cast(attrs, [:title, :steam_id, :suggester])
-    |> validate_required([:title, :steam_id, :suggester])
-    |> unique_constraint([:title, :steam_id])
+    |> cast(attrs, [:id, :title, :suggester])
+    |> validate_required([:id, :title, :suggester])
+    |> unique_constraint([:id, :title])
   end
 end

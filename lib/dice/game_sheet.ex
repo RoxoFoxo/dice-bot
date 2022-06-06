@@ -6,6 +6,7 @@ defmodule Dice.GameSheet do
   import Ecto.Query, warn: false
 
   alias Dice.GameSheet.Game
+  alias Dice.GameSheet.UsersGames
   alias Dice.Repo
   alias Dice.SteamClient
 
@@ -19,18 +20,21 @@ defmodule Dice.GameSheet do
     Input is the games' id on the steam store and
     the user id of who suggested it in the message.
   """
-  def add_steam_game(steam_game_id, user_id) do
+  def add_steam_game(steam_game_id, telegram_id) do
     {_ok, game_info} = steam_result = SteamClient.get_game_data(steam_game_id)
 
-    with nil <- Repo.get_by(Game, steam_id: steam_game_id),
+    with nil <- Repo.get_by(Game, id: steam_game_id),
          {:ok, _game_info} <- steam_result do
-      attrs = %{title: game_info.title, steam_id: steam_game_id, suggester: user_id}
+      attrs = %{title: game_info.title, id: steam_game_id, suggester: telegram_id}
 
       %Game{}
       |> Game.changeset(attrs)
       |> Repo.insert()
 
-      Map.put_new(game_info, :suggester, user_id)
+      %{game_id: steam_game_id, user_id: telegram_id}
+      |> create_user_game_association()
+
+      Map.put_new(game_info, :suggester, telegram_id)
     else
       %Game{} = game ->
         Map.put_new(game_info, :suggester, game.suggester)
@@ -59,8 +63,8 @@ defmodule Dice.GameSheet do
   end
 
   def delete_game(game_detail) do
-    with nil <- Repo.get_by(Game, steam_id: game_detail),
-         nil <- Repo.get_by(Game, title: game_detail) do
+    with nil <- Repo.get_by(Game, title: game_detail),
+         nil <- Repo.get_by(Game, id: game_detail) do
       "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
     else
       %Game{} = game ->
@@ -68,5 +72,11 @@ defmodule Dice.GameSheet do
 
         "The game #{game.title} has been deleted from my database!"
     end
+  end
+
+  def create_user_game_association(attrs) do
+    %UsersGames{}
+    |> UsersGames.changeset(attrs)
+    |> Repo.insert()
   end
 end

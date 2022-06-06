@@ -9,6 +9,7 @@ defmodule Dice.ReplyTest do
 
   @paw_file_id "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
   @cutie_file_id "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
+  @game_insert %Game{title: "Garry's Mod", id: 4000, suggester: 1_001_251_536}
   @steam_game_message """
   Garry's Mod | Suggested by: <a href="tg://user?id=1001251536">this person</a>
   R$ 25,99 | $9.99 | No discount
@@ -83,35 +84,35 @@ defmodule Dice.ReplyTest do
     end
 
     test "/deletegame with the game's id should should show a message that the game is deleted" do
-      Repo.insert(%Game{title: "Garry's Mod", steam_id: "4000", suggester: 1_001_251_536})
+      Repo.insert(@game_insert)
       expect_send_message("The game Garry's Mod has been deleted from my database!")
 
       message = create_message("/deletegame 4000", :text)
 
-      # refute [] == Repo.all(Game)
+      refute [] == Repo.all(Game)
 
       assert {:ok, result} = Reply.answer(message)
 
       assert result.body["result"]["text"] ==
                "The game Garry's Mod has been deleted from my database!"
 
-      # assert [] == Repo.all(Game)
+      assert [] == Repo.all(Game)
     end
 
     test "/deletegame with the game's title should should show a message that the game is deleted" do
-      Repo.insert(%Game{title: "Garry's Mod", steam_id: "4000", suggester: 1_001_251_536})
+      Repo.insert(@game_insert)
       expect_send_message("The game Garry's Mod has been deleted from my database!")
 
       message = create_message("/deletegame Garry's Mod", :text)
 
-      # refute [] == Repo.all(Game)
+      refute [] == Repo.all(Game)
 
       assert {:ok, result} = Reply.answer(message)
 
       assert result.body["result"]["text"] ==
                "The game Garry's Mod has been deleted from my database!"
 
-      # assert [] == Repo.all(Game)
+      assert [] == Repo.all(Game)
     end
 
     test "/deletegame with a game that's not saved in the database should show a not found message" do
