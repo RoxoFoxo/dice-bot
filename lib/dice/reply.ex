@@ -37,7 +37,7 @@ defmodule Dice.Reply do
           "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
         )
 
-      Regex.match?(~r(^/addgame ), text) ->
+      Regex.match?(~r'^/addgame [1-9]+[0-9]*$', text) ->
         add_game_message =
           text
           |> String.trim("/addgame ")
@@ -45,13 +45,39 @@ defmodule Dice.Reply do
 
         Connection.send_message(chat_id, add_game_message)
 
-      Regex.match?(~r(^/deletegame ), text) ->
+      Regex.match?(~r'^/deletegame ', text) ->
         delete_game_message =
           text
           |> String.trim("/deletegame ")
           |> GameSheet.delete_game()
 
         Connection.send_message(chat_id, delete_game_message)
+
+      Regex.match?(~r'^/havegame .+ (yes|no)$', text) ->
+        [game_detail, yes_no] =
+          text
+          |> String.trim("/havegame ")
+          |> String.split(~r' (?=(yes|no)$)')
+
+        have_it? = yes_no == "yes"
+
+        message =
+          GameSheet.update_user_game_association(user["id"], game_detail, %{owns_it: have_it?})
+
+        Connection.send_message(chat_id, message)
+
+      Regex.match?(~r'^/likegame .+ (yes|no)$', text) ->
+        [game_detail, yes_no] =
+          text
+          |> String.trim("/likegame ")
+          |> String.split(~r' (?=(yes|no)$)')
+
+        like_it? = yes_no == "yes"
+
+        message =
+          GameSheet.update_user_game_association(user["id"], game_detail, %{likes_it: like_it?})
+
+        Connection.send_message(chat_id, message)
 
       Regex.match?(~r'^(/r|/roll) ([1-9][0-9]*d[1-9][0-9]*|[0-9]*|\+|\-|/|\*| )+$', text) ->
         {result, _} =

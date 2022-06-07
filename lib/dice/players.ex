@@ -21,12 +21,12 @@ defmodule Dice.Players do
     stored_user = Repo.get_by(User, id: user["id"])
     attrs = %{username: user["username"], name: user["first_name"], id: user["id"]}
 
-    with %User{} <- stored_user,
+    with false <- is_nil(stored_user) && :add_user,
          true <- stored_user.name == user["first_name"],
          true <- stored_user.username == user["username"] do
       :ok
     else
-      nil ->
+      :add_user ->
         add_user(attrs)
 
       false ->
