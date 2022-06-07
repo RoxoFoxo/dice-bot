@@ -20,18 +20,18 @@ defmodule Dice.GameSheet do
     Input is the games' id on the steam store and
     the user id of who suggested it in the message.
   """
-  def add_steam_game(steam_game_id, telegram_id) do
-    {_ok, game_info} = steam_result = SteamClient.get_game_data(steam_game_id)
+  def add_steam_game(game_id, telegram_id) do
+    {_ok, game_info} = steam_result = SteamClient.get_game_data(game_id)
 
-    with nil <- Repo.get_by(Game, id: steam_game_id),
+    with nil <- Repo.get_by(Game, id: game_id),
          {:ok, _game_info} <- steam_result do
-      attrs = %{title: game_info.title, id: steam_game_id, suggester: telegram_id}
+      attrs = %{title: game_info.title, id: game_id, suggester: telegram_id}
 
       %Game{}
       |> Game.changeset(attrs)
       |> Repo.insert()
 
-      %{game_id: steam_game_id, user_id: telegram_id}
+      %{game_id: game_id, user_id: telegram_id}
       |> create_user_game_association()
 
       Map.put_new(game_info, :suggester, telegram_id)
@@ -42,16 +42,16 @@ defmodule Dice.GameSheet do
       {:error, reason} ->
         {:error, reason}
     end
-    |> handle_game_info(steam_game_id)
+    |> handle_game_info(game_id)
   end
 
-  defp handle_game_info(game_info, steam_game_id) do
+  defp handle_game_info(game_info, game_id) do
     case game_info do
       %{} ->
         """
         #{game_info.title} | Suggested by: <a href="tg://user?id=#{game_info.suggester}">this person</a>
         #{game_info.prices}
-        https://store.steampowered.com/app/#{steam_game_id}
+        https://store.steampowered.com/app/#{game_id}
         """
 
       {:error, :not_found} ->
@@ -63,10 +63,10 @@ defmodule Dice.GameSheet do
   end
 
   def delete_game(game_detail) do
-    with nil <- Repo.get_by(Game, title: game_detail),
-         nil <- Repo.get_by(Game, id: game_detail) do
-      "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
-    else
+    case get_game_by_id_or_title(game_detail) do
+      nil ->
+        "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+
       %Game{} = game ->
         Repo.delete(game)
 
@@ -74,9 +74,43 @@ defmodule Dice.GameSheet do
     end
   end
 
-  def create_user_game_association(attrs) do
+  defp create_user_game_association(attrs) do
     %UsersGames{}
     |> UsersGames.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def update_user_game_association(user_id, game_detail, attrs) do
+    with %Game{} = game <- get_game_by_id_or_title(game_detail),
+         {:ok, assoc} <- get_association(user_id, game.id) do
+      assoc
+      |> UsersGames.changeset(attrs)
+      |> Repo.update()
+
+      "I have updated if you own/like #{game.title}!"
+    else
+      nil ->
+        "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+    end
+  end
+
+  defp get_game_by_id_or_title(game_detail) do
+    if String.to_integer(game_detail) do
+      Repo.get_by(Game, id: game_detail)
+    else
+      Repo.get_by(Game, title: game_detail)
+    end
+  end
+
+  defp get_association(user_id, game_id) do
+    attrs = %{user_id: user_id, game_id: game_id}
+
+    case Repo.get_by(UsersGames, attrs) do
+      nil ->
+        create_user_game_association(attrs)
+
+      assoc ->
+        {:ok, assoc}
+    end
   end
 end

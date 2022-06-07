@@ -2,7 +2,6 @@ defmodule Dice.GameSheet.UsersGames do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key false
   schema "users_games" do
     field :owns_it, :boolean
     field :likes_it, :boolean
