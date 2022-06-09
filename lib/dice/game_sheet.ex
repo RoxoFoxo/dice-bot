@@ -94,12 +94,12 @@ defmodule Dice.GameSheet do
     end
   end
 
+  defp get_game_by_id_or_title(game_detail) when is_integer(game_detail) do
+    Repo.get_by(Game, id: game_detail)
+  end
+
   defp get_game_by_id_or_title(game_detail) do
-    if String.to_integer(game_detail) do
-      Repo.get_by(Game, id: game_detail)
-    else
-      Repo.get_by(Game, title: game_detail)
-    end
+    Repo.get_by(Game, title: game_detail)
   end
 
   defp get_association(user_id, game_id) do

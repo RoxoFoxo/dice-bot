@@ -1,4 +1,7 @@
 defmodule Dice.GameSheet.UsersGames do
+  @moduledoc """
+  This schema is the association between Players.User and GameSheet.Game.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 
