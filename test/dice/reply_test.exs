@@ -9,7 +9,7 @@ defmodule Dice.ReplyTest do
 
   @paw_file_id "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
   @cutie_file_id "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
-  @game_insert %Game{title: "Garry's Mod", id: 4000, suggester: 1_001_251_536}
+  @game %Game{title: "Garry's Mod", id: 4000, suggester: 1_001_251_536}
   @steam_game_message """
   Garry's Mod | Suggested by: <a href="tg://user?id=1001251536">this person</a>
   R$ 25,99 | $9.99 | No discount
@@ -58,7 +58,7 @@ defmodule Dice.ReplyTest do
       assert result.body["result"]["sticker"]["file_id"] == @cutie_file_id
     end
 
-    test "/addgame with a game's id should show the its info" do
+    test "/addgame with a game's id should show its info" do
       expect_get_game_data(
         {:ok, %{prices: "R$ 25,99 | $9.99 | No discount", title: "Garry's Mod"}}
       )
@@ -84,29 +84,22 @@ defmodule Dice.ReplyTest do
     end
 
     test "/deletegame with the game's id should should show a message that the game is deleted" do
-      Repo.insert(@game_insert)
+      Repo.insert(@game)
       expect_send_message("The game Garry's Mod has been deleted from my database!")
 
       message = create_message("/deletegame 4000", :text)
-
-      refute [] == Repo.all(Game)
 
       assert {:ok, result} = Reply.answer(message)
 
       assert result.body["result"]["text"] ==
                "The game Garry's Mod has been deleted from my database!"
-
-      assert [] == Repo.all(Game)
     end
 
     test "/deletegame with the game's title should should show a message that the game is deleted" do
-      Repo.insert(@game_insert)
+      Repo.insert(@game)
       expect_send_message("The game Garry's Mod has been deleted from my database!")
 
       message = create_message("/deletegame Garry's Mod", :text)
-
-      refute [] == Repo.all(Game)
-
       assert {:ok, result} = Reply.answer(message)
 
       assert result.body["result"]["text"] ==
@@ -121,7 +114,52 @@ defmodule Dice.ReplyTest do
       )
 
       message = create_message("/deletegame 440", :text)
+      assert {:ok, result} = Reply.answer(message)
 
+      assert result.body["result"]["text"] ==
+               "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+    end
+
+    test "/havegame returns that the assoc has been updated when given correct id and yes or no" do
+      expect_send_message("I have updated if you own/like Garry's Mod!")
+
+      Repo.insert(@game)
+
+      message = create_message("/havegame 4000 yes", :text)
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] == "I have updated if you own/like Garry's Mod!"
+    end
+
+    test "/havegame returns an error message when id is incorrect" do
+      expect_send_message(
+        "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+      )
+
+      message = create_message("/havegame 4001 yes", :text)
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] ==
+               "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+    end
+
+    test "/likegame returns that the assoc has been updated when given correct id and yes or no" do
+      expect_send_message("I have updated if you own/like Garry's Mod!")
+
+      Repo.insert(@game)
+
+      message = create_message("/likegame 4000 yes", :text)
+      assert {:ok, result} = Reply.answer(message)
+
+      assert result.body["result"]["text"] == "I have updated if you own/like Garry's Mod!"
+    end
+
+    test "/likegame returns an error message when id is incorrect" do
+      expect_send_message(
+        "Sorry, I couldn't find that game in my database, maybe the id or title is incorrect?"
+      )
+
+      message = create_message("/likegame 4001 yes", :text)
       assert {:ok, result} = Reply.answer(message)
 
       assert result.body["result"]["text"] ==
@@ -133,7 +171,6 @@ defmodule Dice.ReplyTest do
       expect_send_message("Calculating 1d20! Result: 20")
 
       message = create_message("/roll 1d20", :text)
-
       assert {:ok, result} = Reply.answer(message)
       assert result.body["result"]["text"] == "Calculating 1d20! Result: 20"
     end
@@ -142,7 +179,6 @@ defmodule Dice.ReplyTest do
       expect_send_message(:no_message)
 
       message = create_message("This is not a commmand", :text)
-
       assert :ok == Reply.answer(message)
     end
 
