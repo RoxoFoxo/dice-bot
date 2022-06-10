@@ -18,25 +18,33 @@ defmodule Dice.Reply do
   #          } e #{Enum.random(Lists.objective())}."
   #        )
 
+  def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "from" => user, "text" => "/beep"}}) do
+    Players.check_user(user)
+    Connection.send_message(chat_id, "boop")
+  end
+
+  def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "from" => user, "text" => "/paw"}}) do
+    Players.check_user(user)
+
+    Connection.send_sticker(
+      chat_id,
+      "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
+    )
+  end
+
+  def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "from" => user, "text" => "/cutie"}}) do
+    Players.check_user(user)
+
+    Connection.send_sticker(
+      chat_id,
+      "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
+    )
+  end
+
   def answer(%{"message" => %{"chat" => %{"id" => chat_id}, "from" => user, "text" => text}}) do
     Players.check_user(user)
 
     cond do
-      text == "/beep" ->
-        Connection.send_message(chat_id, "boop")
-
-      text == "/paw" ->
-        Connection.send_sticker(
-          chat_id,
-          "CAACAgEAAxkBAANeYBCKLIhaKQwOobteRP3a5quwUsIAAh8AAxeZ2Q7IeDvomNaN1B4E"
-        )
-
-      text == "/cutie" ->
-        Connection.send_sticker(
-          chat_id,
-          "CAACAgEAAxkBAANyYBDao0rvEg4hd3aH-JM7qRAVXQQAAgUAA5T5DDXKWqGUl7FB1R4E"
-        )
-
       Regex.match?(~r'^/addgame [1-9]+[0-9]*$', text) ->
         add_game_message =
           text
